@@ -1,9 +1,5 @@
 #custom
 .idea
-public/
-.firebase
-.firebaserc
-firebase.json
 
 # Logs
 logs
