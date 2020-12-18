@@ -221,7 +221,7 @@
 			display: block;
 		}
 
-		@media screen and (max-height: 725px) {
+		@media screen and (max-height: 850px) {
 			.legend-container {
 				flex-direction: row;
 				height: 50px;
@@ -354,8 +354,8 @@
 	};
 
 	const randomizeStartingSide = () => {
-        (Math.random() < 0.5) ? side = 1 : side = -1;
-    };
+		(Math.random() < 0.5) ? side = 1 : side = -1;
+	};
 
 	document.addEventListener('keydown', (event) => {
 		if (event.key === 'w' || event.keyCode === 87) {
@@ -426,12 +426,7 @@
 				paddleBounceAudio.play().then(audio => audio);
 			} else {
 				score2++;
-				window.localStorage.setItem('score2', score2.toString());
-                positionOfPaddle1 = (arenaBottomHeight / 2 - paddleHeight / 2);
-				positionOfPaddle2 = (arenaBottomHeight / 2 - paddleHeight / 2);
-                scoreAudio.play().then(audio => audio);
-                startBall();
-				victoryChecker();
+				endGameSettings('score2');
 			}
 		}
 
@@ -441,12 +436,7 @@
 				paddleBounceAudio.play().then(audio => audio);
 			} else {
 				score1++;
-				window.localStorage.setItem('score1', score1.toString());
-				positionOfPaddle1 = (arenaBottomHeight / 2 - paddleHeight / 2);
-				positionOfPaddle2 = (arenaBottomHeight / 2 - paddleHeight / 2);
-				scoreAudio.play().then(audio => audio);
-				startBall();
-				victoryChecker();
+				endGameSettings('score1');
 			}
 		}
 
@@ -462,6 +452,14 @@
 
 	const positionUpdateInterval = setInterval(intervalCallBack, 50);
 
+	const endGameSettings = (score) => {
+		window.localStorage.setItem(score, score === 'score2' ? score2.toString() : score1.toString());
+		positionOfPaddle1 = (arenaBottomHeight / 2 - paddleHeight / 2);
+		positionOfPaddle2 = (arenaBottomHeight / 2 - paddleHeight / 2);
+		scoreAudio.play().then(audio => audio);
+		startBall();
+		victoryChecker();
+	}
 
 	const victoryChecker = () => {
 		if (score1 === winningScore || score2 === winningScore) {
@@ -483,7 +481,6 @@
 	};
 
 	const startGame = () => {
-
 		continueGame();
 
 		const endGameContainer = document.getElementById('endGameContainer');
@@ -491,13 +488,18 @@
 
 		endGameContainer.classList.add('hide');
 
-		document.addEventListener('keyup', (event) => {
+		const gameStartCallback = (event) => {
 			if (event.key === 'enter' || event.keyCode === 13) {
 				modal.classList.add('hide');
 
 				startBall();
+
+				document.removeEventListener('keyup', gameStartCallback);
 			}
-		});
+		};
+
+		document.addEventListener('keyup', gameStartCallback);
+
 	};
 
 	const endGame = () => {
@@ -532,16 +534,17 @@
 	};
 
 	const continueGame = () => {
-
 		const startingMessage = document.querySelector('.start-game-container p');
 		const isSavedToLocalStorage = (Number(window.localStorage.getItem('score1')) !== 0) || (Number(window.localStorage.getItem('score2')) !== 0);
+		const endInfo = (type) => {
+			return `Press <strong>'Enter'</strong> to ${type} the game.`
+		};
 
 		if (isSavedToLocalStorage) {
-			startingMessage.innerHTML = `Press <strong>'Enter'</strong> to continue the game.`;
+			startingMessage.innerHTML = endInfo('continue');
 		} else {
-			startingMessage.innerHTML = `Press <strong>'Enter'</strong> to start the game.`;
+			startingMessage.innerHTML = endInfo('start');
 		}
-
 	};
 
 	startGame();
